@@ -1,3 +1,5 @@
+export * from '@/models/circles/model';
+
 export interface InferenceModel {
   id: string;
   name: string;
