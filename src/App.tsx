@@ -3,6 +3,7 @@ import { Framework } from '@/frameworks';
 import FrameworkSelector from '@/components/FrameworkSelector';
 import { CirclesModel, InferenceModel } from '@/models';
 import ModelGrid from '@/components/ModelGrid';
+import ModelDetails from '@/pages/ModelDetails';
 
 const models = [new CirclesModel()];
 
@@ -10,14 +11,17 @@ const App: React.FC = () => {
   const [selectedFramework, setSelectedFramework] = useState<Framework>(
     Framework.Noir
   );
+  const [selectedModel, setSelectedModel] = useState<InferenceModel | null>(
+    null
+  );
 
   const handleModelClick = (model: InferenceModel) => {
-    console.log('Clicked model:', model.name);
-    // TODO: Implement model selection logic
+    setSelectedModel(model);
   };
 
   const handleFrameworkChange = (framework: Framework) => {
     setSelectedFramework(framework);
+    setSelectedModel(null);
   };
 
   const filteredModels = models.filter((model) =>
@@ -31,7 +35,11 @@ const App: React.FC = () => {
         selectedFramework={selectedFramework}
         onFrameworkChange={handleFrameworkChange}
       />
-      <ModelGrid models={filteredModels} onModelClick={handleModelClick} />
+      {selectedModel ? (
+        <ModelDetails model={selectedModel} />
+      ) : (
+        <ModelGrid models={filteredModels} onModelClick={handleModelClick} />
+      )}
     </div>
   );
 };
