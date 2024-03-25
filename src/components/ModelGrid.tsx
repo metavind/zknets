@@ -1,6 +1,6 @@
 import React from 'react';
 import ModelGridElement from '@/components/ModelGridElement';
-import { InferenceModel } from '@/models/index';
+import { InferenceModel } from '@/models';
 
 interface ModelGridProps {
   models: InferenceModel[];
