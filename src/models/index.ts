@@ -1,3 +1,5 @@
+import { Framework } from '@/frameworks';
+
 export * from '@/models/circles/model';
 
 export interface InferenceModel {
@@ -5,14 +7,8 @@ export interface InferenceModel {
   name: string;
   description: string;
   thumbnail: string;
-  compatibleFrameworks: string[];
+  supportedFrameworks: Framework[];
   inputShape: number[];
   outputShape: number[];
   // run(input: number[]): number[];
-}
-
-export interface Framework {
-  id: string;
-  name: string;
-  description: string;
 }

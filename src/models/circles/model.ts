@@ -1,4 +1,5 @@
 import { InferenceModel } from '@/models/index';
+import { Framework } from '@/frameworks';
 
 export class CirclesModel implements InferenceModel {
   id = 'circles';
@@ -9,7 +10,7 @@ export class CirclesModel implements InferenceModel {
 
   thumbnail = '/thumbnails/circles_visualization.png';
 
-  compatibleFrameworks = ['noir'];
+  supportedFrameworks = [Framework.Noir];
 
   inputShape = [2];
 
