@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import { Framework } from '@/frameworks';
 import FrameworkSelector from '@/components/FrameworkSelector';
+import InitWasmNoir from '@/components/InitWasmNoir';
 import { CirclesModel, InferenceModel } from '@/models';
 import ModelGrid from '@/components/ModelGrid';
 import ModelDetails from '@/pages/ModelDetails';
@@ -28,19 +31,27 @@ const App: React.FC = () => {
     model.supportedFrameworks.includes(selectedFramework)
   );
 
+  const WasmInitializationWrapper = InitWasmNoir;
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold">ZK Nets</h1>
-      <FrameworkSelector
-        selectedFramework={selectedFramework}
-        onFrameworkChange={handleFrameworkChange}
-      />
-      {selectedModel ? (
-        <ModelDetails model={selectedModel} />
-      ) : (
-        <ModelGrid models={filteredModels} onModelClick={handleModelClick} />
-      )}
-    </div>
+    <WasmInitializationWrapper>
+      <div>
+        <h1 className="text-3xl font-bold">ZK Nets</h1>
+        <FrameworkSelector
+          selectedFramework={selectedFramework}
+          onFrameworkChange={handleFrameworkChange}
+        />
+        {selectedModel ? (
+          <ModelDetails
+            model={selectedModel}
+            selectedFramework={selectedFramework}
+          />
+        ) : (
+          <ModelGrid models={filteredModels} onModelClick={handleModelClick} />
+        )}
+      </div>
+      <ToastContainer />
+    </WasmInitializationWrapper>
   );
 };
 
