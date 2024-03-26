@@ -1,9 +1,8 @@
 import { toast } from 'react-toastify';
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg';
 import { Noir } from '@noir-lang/noir_js';
-import { ProofData } from '@noir-lang/types';
+import { CompiledCircuit, ProofData } from '@noir-lang/types';
 import { mapToHex } from '@/utils/primeField';
-import { getCircuit } from '@/frameworks/noir/circuitCompiler';
 
 interface GenerateProofNoirResult {
   noir: Noir;
@@ -16,7 +15,9 @@ const generateProofNoir = async (
 ): Promise<GenerateProofNoirResult> => {
   const inputs = { input: mapToHex(input) };
 
-  const circuit = await getCircuit(model);
+  const circuitPath = `/circuits/noir/${model}/target/${model}.json`;
+  const response = await fetch(circuitPath);
+  const circuit = (await response.json()) as CompiledCircuit;
 
   const backend = new BarretenbergBackend(circuit, {
     threads: navigator.hardwareConcurrency,
