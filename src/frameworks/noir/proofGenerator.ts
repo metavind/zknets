@@ -15,7 +15,7 @@ const generateProofNoir = async (
 ): Promise<GenerateProofNoirResult> => {
   const inputs = { input: mapToHex(input) };
 
-  const circuitPath = `/circuits/noir/${model}/target/${model}.json`;
+  const circuitPath = `/circuits/noir/${model}.json`;
   const response = await fetch(circuitPath);
   const circuit = (await response.json()) as CompiledCircuit;
 
