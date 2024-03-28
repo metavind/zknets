@@ -3,6 +3,7 @@ import { ProofData } from '@noir-lang/types';
 import { Noir } from '@noir-lang/noir_js';
 import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
+import Circles from '@/components/Inputs/Circles';
 import generateProofNoir from '@/frameworks/noir/proofGenerator';
 import offChainVerification from '@/frameworks/noir/offChainVerifier';
 
@@ -16,27 +17,22 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   selectedFramework,
 }) => {
   const [inferenceResult, setInferenceResult] = useState<number[] | null>(null);
+  const [input, setInput] = useState<number[]>([]);
   const [proofData, setProofData] = useState<ProofData | undefined>(undefined);
   const [proofHex, setProofHex] = useState<string | null>(null);
   const [outputs, setOutputs] = useState<number[] | null>(null);
   const [noirInstance, setNoirInstance] = useState<Noir | undefined>(undefined);
 
+  const handleInputChange = (newInput: number[]) => {
+    setInput(newInput);
+  };
+
   const handleRunInference = async () => {
-    // const input = [
-    //  /* TODO: Get input from user */
-    // ];
-    const input = [4443, 966478];
-    const result = await model.run(input);
+    const result = await model.run(input.map((elem) => elem * 10 ** 6));
     setInferenceResult(result);
   };
 
   const handleGenerateProof = async () => {
-    // const input = [
-    //   /* TODO: Get input from user */
-    // ];
-
-    const input = [4443, 966478];
-
     let noir: Noir | undefined;
     let generatedProofData: ProofData | undefined;
 
@@ -44,7 +40,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       case Framework.Noir:
         ({ noir, proofData: generatedProofData } = await generateProofNoir(
           model.id,
-          input
+          input.map((elem) => Math.round(elem * 10 ** 6))
         ));
         setNoirInstance(noir);
         setProofData(generatedProofData);
@@ -85,6 +81,11 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       <div>
         <h3>Output Shape:</h3>
         <p>{model.outputShape.join(' x ')}</p>
+      </div>
+      <div>
+        <h3>Input</h3>
+        <Circles width={700} height={700} onInputChange={handleInputChange} />
+        <p>Selected Input: {input.join(', ')}</p>
       </div>
       <div>
         <h3>Inference</h3>
