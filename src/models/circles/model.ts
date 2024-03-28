@@ -1,6 +1,7 @@
 import { InferenceSession, Tensor } from 'onnxruntime-web';
 import { InferenceModel } from '@/models/index';
 import { Framework } from '@/frameworks';
+import { argMax } from '@/utils/array';
 
 export class CirclesModel implements InferenceModel {
   id = 'circles';
@@ -18,9 +19,7 @@ export class CirclesModel implements InferenceModel {
   outputShape = [1];
 
   async run(input: number[]): Promise<number[]> {
-    const session = await InferenceSession.create(
-      'models/circles/model.onnx'
-    );
+    const session = await InferenceSession.create('models/circles/model.onnx');
 
     const tensorData = Float32Array.from(input);
     const tensor = new Tensor('float32', tensorData, [1, this.inputShape[0]]);
@@ -30,6 +29,6 @@ export class CirclesModel implements InferenceModel {
 
     const outputData = Array.from(outputTensor.data as Float32Array);
 
-    return outputData;
+    return [argMax(outputData)];
   }
 }
