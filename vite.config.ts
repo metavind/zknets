@@ -19,7 +19,7 @@ export default defineConfig({
       targets: [
         {
           src: 'node_modules/onnxruntime-web/dist/*.wasm',
-          dest: 'dist',
+          dest: './',
         },
       ],
     }),
