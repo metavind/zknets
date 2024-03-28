@@ -10,5 +10,5 @@ export interface InferenceModel {
   supportedFrameworks: Framework[];
   inputShape: number[];
   outputShape: number[];
-  // run(input: number[]): number[];
+  run(input: number[]): Promise<number[]>;
 }

@@ -25,9 +25,8 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     // const input = [
     //  /* TODO: Get input from user */
     // ];
-    // const result = await model.run(input);
-    /* TODO: Get inference from tensorflowjs */
-    const result = await Promise.resolve([3]);
+    const input = [4443, 966478];
+    const result = await model.run(input);
     setInferenceResult(result);
   };
 
@@ -36,7 +35,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     //   /* TODO: Get input from user */
     // ];
 
-    const input = [192460, -394641];
+    const input = [4443, 966478];
 
     let noir: Noir | undefined;
     let generatedProofData: ProofData | undefined;
