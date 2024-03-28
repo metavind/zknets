@@ -16,6 +16,7 @@
     "@noir-lang/noir_wasm": "^0.25.0",
     "@noir-lang/noirc_abi": "^0.25.0",
     "@noir-lang/types": "^0.25.0",
+    "@vercel/analytics": "^1.2.2",
     "onnxruntime-web": "^1.17.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
