@@ -19,6 +19,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 }) => {
   const [inferenceOutput, setInferenceOutput] = useState<number[] | null>(null);
   const [input, setInput] = useState<number[]>([]);
+  const [proofGenerated, setProofGenerated] = useState<boolean>(false);
   const [proofData, setProofData] = useState<ProofData | undefined>(undefined);
   const [zkOutput, setZkOutput] = useState<number[] | null>(null);
   const [proofHex, setProofHex] = useState<string | null>(null);
@@ -27,6 +28,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   const handleInputChange = (newInput: number[]) => {
     setInferenceOutput(null);
     setZkOutput(null);
+    setProofGenerated(false);
     setProofData(undefined);
     setProofHex(null);
     setInput(newInput);
@@ -58,6 +60,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 
       const hexProof = mapProofToHex(generatedProofData.proof);
       setProofHex(hexProof);
+      setProofGenerated(true);
     }
   };
 
@@ -90,27 +93,30 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       </div>
       <div className="mb-8 flex justify-center space-x-4">
         <button
-          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
           type="button"
           onClick={handleGenerateProof}
+          disabled={input.length === 0}
         >
           Run Inference
           <br />& Generate Proof
         </button>
 
         <button
-          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
           type="button"
           onClick={handleVerifyProofOffChain}
+          disabled={!proofGenerated}
         >
           Verify
           <br />
           (off-chain)
         </button>
         <button
-          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
           type="button"
           onClick={handleVerifyProofOnChain}
+          disabled={!proofGenerated}
         >
           Verify
           <br />
