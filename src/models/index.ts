@@ -10,5 +10,6 @@ export interface InferenceModel {
   supportedFrameworks: Framework[];
   inputShape: number[];
   outputShape: number[];
-  run(input: number[]): Promise<number[]>;
+  scalingFactor: number;
+  runInference(input: number[]): Promise<number[]>;
 }

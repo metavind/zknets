@@ -29,7 +29,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   };
 
   const handleRunInference = async () => {
-    const result = await model.run(input.map((elem) => elem * 10 ** 6));
+    const result = await model.runInference(input);
     setInferenceResult(result);
   };
 
