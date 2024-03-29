@@ -17,11 +17,11 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   model,
   selectedFramework,
 }) => {
-  const [inferenceResult, setInferenceResult] = useState<number[] | null>(null);
+  const [inferenceOutput, setInferenceOutput] = useState<number[] | null>(null);
   const [input, setInput] = useState<number[]>([]);
   const [proofData, setProofData] = useState<ProofData | undefined>(undefined);
+  const [zkOutput, setZkOutput] = useState<number[] | null>(null);
   const [proofHex, setProofHex] = useState<string | null>(null);
-  const [outputs, setOutputs] = useState<number[] | null>(null);
   const [noirInstance, setNoirInstance] = useState<Noir | undefined>(undefined);
 
   const handleInputChange = (newInput: number[]) => {
@@ -30,7 +30,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 
   const handleGenerateProof = async () => {
     const result = await model.runInference(input);
-    setInferenceResult(result);
+    setInferenceOutput(result);
 
     let noir: Noir | undefined;
     let generatedProofData: ProofData | undefined;
@@ -49,8 +49,8 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     }
 
     if (generatedProofData) {
-      const generatedOutputs = generatedProofData.publicInputs;
-      setOutputs(mapHexToInt(generatedOutputs));
+      const generatedZkOutput = generatedProofData.publicInputs;
+      setZkOutput(mapHexToInt(generatedZkOutput));
 
       const hexProof = mapProofToHex(generatedProofData.proof);
       setProofHex(hexProof);
@@ -114,12 +114,12 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
         </button>
       </div>
       <div className="mb-6">
-        {inferenceResult && proofData && (
+        {inferenceOutput && proofData && (
           <div>
             <h4>Inference Result:</h4>
-            <p>{inferenceResult.join(', ')}</p>
+            <p>{inferenceOutput.join(', ')}</p>
             <h4>Output:</h4>
-            <p>{outputs?.join(', ')}</p>
+            <p>{zkOutput?.join(', ')}</p>
             <h4>Generated Proof:</h4>
             <p>{proofHex}</p>
           </div>
