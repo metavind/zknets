@@ -9,32 +9,23 @@ interface FrameworkSelectorProps {
 const FrameworkSelector: React.FC<FrameworkSelectorProps> = ({
   selectedFramework,
   onFrameworkChange,
-}) => {
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onFrameworkChange(event.target.value as Framework);
-  };
-  return (
-    <div className="mb-4">
-      <label
-        htmlFor="framework-selector"
-        className="mb-2 block text-sm font-medium text-gray-900"
+}) => (
+  <div className="mb-4 flex justify-center space-x-4">
+    {Object.values(Framework).map((framework) => (
+      <button
+        type="button"
+        key={framework}
+        className={`rounded-lg px-6 py-3 font-semibold ${
+          selectedFramework === framework.toString()
+            ? 'bg-gray-800 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-900 hover:text-white'
+        }`}
+        onClick={() => onFrameworkChange(framework)}
       >
-        Select a framework:
-        <select
-          id="framework-selector" // This ID can actually be removed if not used elsewhere for CSS or JavaScript
-          value={selectedFramework}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        >
-          {Object.values(Framework).map((framework) => (
-            <option key={framework} value={framework}>
-              {framework}
-            </option>
-          ))}
-        </select>
-      </label>
-    </div>
-  );
-};
+        {framework}
+      </button>
+    ))}
+  </div>
+);
 
 export default FrameworkSelector;
