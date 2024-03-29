@@ -18,6 +18,9 @@ export const mapToPrimeField = (input: number[]): bigint[] =>
 export const mapIntToHex = (input: bigint[]): string[] =>
   input.map((val) => `0x${val.toString(16)}`);
 
+export const mapHexToInt = (input: string[]): number[] =>
+  input.map((val) => parseInt(val, 10));
+
 export const mapProofToHex = (proof: Uint8Array): string =>
   Array.from(proof)
     .map((byte) => byte.toString(16).padStart(2, '0'))
