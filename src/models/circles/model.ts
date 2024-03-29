@@ -10,7 +10,7 @@ export class CirclesModel implements InferenceModel {
 
   description = 'Binary classification of concentric circles';
 
-  thumbnail = '/thumbnails/circles_visualization.png';
+  thumbnail = '/thumbnails/circles.png';
 
   supportedFrameworks = [Framework.Noir];
 
