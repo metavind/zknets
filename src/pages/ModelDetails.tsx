@@ -28,12 +28,10 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     setInput(newInput);
   };
 
-  const handleRunInference = async () => {
+  const handleGenerateProof = async () => {
     const result = await model.runInference(input);
     setInferenceResult(result);
-  };
 
-  const handleGenerateProof = async () => {
     let noir: Noir | undefined;
     let generatedProofData: ProofData | undefined;
 
@@ -41,7 +39,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       case Framework.Noir:
         ({ noir, proofData: generatedProofData } = await generateProofNoir(
           model.id,
-          input.map((elem) => Math.round(elem * 10 ** 6))
+          input.map((elem) => Math.round(elem * model.scalingFactor))
         ));
         setNoirInstance(noir);
         setProofData(generatedProofData);
@@ -59,7 +57,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     }
   };
 
-  const handleVerifyProof = async () => {
+  const handleVerifyProofOffChain = async () => {
     switch (selectedFramework) {
       case Framework.Noir:
         await offChainVerification(noirInstance, proofData);
@@ -69,54 +67,65 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     }
   };
 
+  const handleVerifyProofOnChain = async () => {
+    // TODO: Implement on-chain verification
+    /* {
+
+    } */
+
+    await Promise.resolve(-1);
+  };
+
   return (
-    <div>
-      <h2>{model.name}</h2>
-      <p>{model.description}</p>
-      <div>
-        <h3>Input Shape:</h3>
-        <p>{model.inputShape.join(' x ')}</p>
+    <div className="text-center">
+      <div className="mb-6">
+        <div className="flex justify-center">
+          <Circles width={500} height={500} onInputChange={handleInputChange} />
+        </div>
+        <p className="mt-2">Selected Input: {input.join(', ')}</p>
       </div>
-      <div>
-        <h3>Output Shape:</h3>
-        <p>{model.outputShape.join(' x ')}</p>
-      </div>
-      <div>
-        <h3>Input</h3>
-        <Circles width={700} height={700} onInputChange={handleInputChange} />
-        <p>Selected Input: {input.join(', ')}</p>
-      </div>
-      <div>
-        <h3>Inference</h3>
-        <button type="button" onClick={handleRunInference}>
+      <div className="mb-6 flex justify-center space-x-4">
+        <button
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          type="button"
+          onClick={handleGenerateProof}
+        >
           Run Inference
+          <br />& Generate Proof
         </button>
-        {inferenceResult && (
+
+        <button
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          type="button"
+          onClick={handleVerifyProofOffChain}
+        >
+          Verify
+          <br />
+          (off-chain)
+        </button>
+        <button
+          className="mb-2 me-2 w-60 rounded-lg border border-gray-800 bg-gray-100 px-10 py-5 text-center text-lg font-semibold text-gray-700 hover:bg-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
+          type="button"
+          onClick={handleVerifyProofOnChain}
+        >
+          Verify
+          <br />
+          (on-chain)
+        </button>
+      </div>
+      <div className="mb-6">
+        {inferenceResult && proofData && (
           <div>
             <h4>Inference Result:</h4>
             <p>{inferenceResult.join(', ')}</p>
-          </div>
-        )}
-      </div>
-      <div>
-        <h3>Proof Generation</h3>
-        <button type="button" onClick={handleGenerateProof}>
-          Generate Proof
-        </button>
-        {proofData && (
-          <div>
-            <h4>Generated Proof:</h4>
-            <p>{proofHex}</p>
             <h4>Output:</h4>
             <p>{outputs?.join(', ')}</p>
+            <h4>Generated Proof:</h4>
+            <p>{proofHex}</p>
           </div>
         )}
       </div>
-      <div>
-        <h3>Proof Verification (off-chain)</h3>
-        <button type="button" onClick={handleVerifyProof}>
-          Verify Proof (off-chain)
-        </button>
+      <div className="mb-6">
         {proofData && (
           <div>
             <h4>Verified Proof:</h4>

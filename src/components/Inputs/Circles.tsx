@@ -180,7 +180,12 @@ const Circles: React.FC<CirclesProps> = ({ width, height, onInputChange }) => {
     );
   }, [width, height, gridSize, onInputChange, points, selectedPoint]);
 
-  return <svg ref={svgRef} width={width + offset} height={height + offset} />;
+  return (
+    <div>
+      <h2 className="mb-4 text-2xl font-bold">Select Point</h2>
+      <svg ref={svgRef} width={width + offset} height={height + offset} />
+    </div>
+  );
 };
 
 export default Circles;
