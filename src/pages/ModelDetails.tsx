@@ -6,6 +6,7 @@ import { Framework } from '@/frameworks';
 import Circles from '@/components/Inputs/Circles';
 import generateProofNoir from '@/frameworks/noir/proofGenerator';
 import offChainVerification from '@/frameworks/noir/offChainVerifier';
+import { mapProofToHex } from '@/utils/proof';
 
 interface ModelDetailsProps {
   model: InferenceModel;
@@ -53,9 +54,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       const generatedOutputs = generatedProofData.publicInputs;
       setOutputs(generatedOutputs.map((elem) => parseInt(elem, 10)));
 
-      const hexProof = Array.from(generatedProofData.proof)
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join(' ');
+      const hexProof = mapProofToHex(generatedProofData.proof);
       setProofHex(hexProof);
     }
   };
