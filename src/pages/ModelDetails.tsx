@@ -96,7 +96,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 
   return (
     <div className="text-center">
-      <div className="mb-6">
+      <div className="mb-6 mt-8">
         <div className="flex justify-center">
           <Circles width={500} height={500} onInputChange={handleInputChange} />
         </div>
@@ -153,7 +153,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
       </div>
       <div className="mb-6 flex justify-center">
         {inferenceOutput && (
-          <div className="w-3/4 border-t-2 border-gray-400 pt-6">
+          <div className="w-full border-t-2 border-gray-400 pt-6">
             <div className="px-40">
               <div className="mb-6 mt-2 flex justify-center space-x-32">
                 <div>
@@ -173,7 +173,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
               </div>
             </div>
             <div className="mb-6">
-              {inferenceOutput && proofData && (
+              {proofData && (
                 <div>
                   <h4 className="mb-2 text-xl font-semibold">Proof</h4>
                   <div className="h-40 overflow-y-auto rounded-lg border border-gray-300 bg-gray-50 p-4">
