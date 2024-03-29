@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
+import { gaussianRandom } from '@/utils/math';
 
 interface Point {
   x: number;
@@ -18,26 +19,39 @@ const generatePoints = (
   count: number,
   color: string,
   width: number,
-  height: number
+  height: number,
+  offset: number
 ) => {
   const points: Point[] = [];
-  const centerX = width / 2;
-  const centerY = height / 2;
+  const centerX = width / 2 + offset / 2;
+  const centerY = height / 2 + offset / 2;
+
+  // Generate points on a unit circle with Gaussian noise
   for (let i = 0; i < count; i += 1) {
-    const angle = (((i * 360) / count) * Math.PI) / 180;
-    const x = centerX + (radius + Math.random() * 20 - 10) * Math.cos(angle);
-    const y = centerY + (radius + Math.random() * 20 - 10) * Math.sin(angle);
-    points.push({ x, y, color });
+    const angle = (i * 2 * Math.PI) / count;
+    const unitX = Math.cos(angle);
+    const unitY = Math.sin(angle);
+    const noiseX = gaussianRandom() * 0.025;
+    const noiseY = gaussianRandom() * 0.025;
+    points.push({ x: unitX + noiseX, y: unitY + noiseY, color });
   }
-  return points;
+
+  // Scale and translate points to the canvas
+  const scaledPoints = points.map((point) => ({
+    x: centerX + point.x * radius,
+    y: centerY + point.y * radius,
+    color: point.color,
+  }));
+
+  return scaledPoints;
 };
 
 const renderGrid = (
   svg: d3.Selection<SVGSVGElement | null, unknown, null, undefined>,
   width: number,
-  height: number
+  height: number,
+  gridSize: number
 ) => {
-  const gridSize = 50;
   const xAxisTicks = d3.range(0, width + gridSize, gridSize);
   const yAxisTicks = d3.range(0, height + gridSize, gridSize);
 
@@ -73,7 +87,8 @@ const renderCircles = (
   setSelectedPoint: (point: Point | null) => void,
   onInputChange: (input: number[]) => void,
   width: number,
-  height: number
+  height: number,
+  offset: number
 ) => {
   svg
     .selectAll('circle')
@@ -96,8 +111,8 @@ const renderCircles = (
     })
     .on('click', (_, d: Point) => {
       setSelectedPoint(d);
-      const centerX = width / 2;
-      const centerY = height / 2;
+      const centerX = width / 2 + offset / 2;
+      const centerY = height / 2 + offset / 2;
       const X = (d.x - centerX) / (width / 2);
       const Y = (centerY - d.y) / (height / 2);
       onInputChange([X, Y]);
@@ -126,15 +141,33 @@ const Circles: React.FC<CirclesProps> = ({ width, height, onInputChange }) => {
   const [points, setPoints] = useState<Point[]>([]);
   const [selectedPoint, setSelectedPoint] = useState<Point | null>(null);
 
+  const scaleFactor = 0.4;
+  const offset = 60;
+  const gridSize = (height + offset) / 16;
+
   useEffect(() => {
-    const bluePoints = generatePoints(150, 90, 'blue', width, height);
-    const redPoints = generatePoints(300, 180, 'green', width, height);
-    setPoints([...bluePoints, ...redPoints]);
+    const greenPoints = generatePoints(
+      height / 2,
+      180,
+      'green',
+      width,
+      height,
+      offset
+    );
+    const bluePoints = generatePoints(
+      (height / 2) * scaleFactor,
+      60,
+      'blue',
+      width,
+      height,
+      offset
+    );
+    setPoints([...bluePoints, ...greenPoints]);
   }, [width, height]);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
-    renderGrid(svg, width, height);
+    renderGrid(svg, width + offset, height + offset, gridSize);
     renderCircles(
       svg,
       points,
@@ -142,11 +175,17 @@ const Circles: React.FC<CirclesProps> = ({ width, height, onInputChange }) => {
       setSelectedPoint,
       onInputChange,
       width,
-      height
+      height,
+      offset
     );
-  }, [width, height, onInputChange, points, selectedPoint]);
+  }, [width, height, gridSize, onInputChange, points, selectedPoint]);
 
-  return <svg ref={svgRef} width={width} height={height} />;
+  return (
+    <div>
+      <h2 className="mb-4 text-2xl font-bold">Select Point</h2>
+      <svg ref={svgRef} width={width + offset} height={height + offset} />
+    </div>
+  );
 };
 
 export default Circles;
