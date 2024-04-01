@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { ProofData } from '@noir-lang/types';
+import { ProofData as NoirProofData } from '@noir-lang/types';
 import { Noir } from '@noir-lang/noir_js';
 import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
 import Circles from '@/components/Inputs/Circles';
 import generateProofNoir from '@/frameworks/noir/proofGenerator';
+import { generateCircomProof } from '@/frameworks/circom/proofGenerator';
+import { CircomProofData } from '@/frameworks/circom';
 import offChainVerification from '@/frameworks/noir/offChainVerifier';
 import { mapProofToHex, mapHexToInt } from '@/utils/proof';
 
@@ -19,7 +21,9 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 }) => {
   const [inferenceOutput, setInferenceOutput] = useState<number[] | null>(null);
   const [input, setInput] = useState<number[]>([]);
-  const [proofData, setProofData] = useState<ProofData | undefined>(undefined);
+  const [proofData, setProofData] = useState<
+    CircomProofData | NoirProofData | undefined
+  >(undefined);
   const [zkOutput, setZkOutput] = useState<number[] | null>(null);
   const [proofHex, setProofHex] = useState<string | null>(null);
   const [noirInstance, setNoirInstance] = useState<Noir | undefined>(undefined);
@@ -48,28 +52,42 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     const result = await model.runInference(input);
     setInferenceOutput(result);
 
-    let noir: Noir | undefined;
-    let generatedProofData: ProofData | undefined;
+    let generatedProofData: NoirProofData | CircomProofData | undefined;
 
     switch (selectedFramework) {
-      case Framework.Noir:
+      case Framework.Circom: {
+        generatedProofData = await generateCircomProof({
+          a: input.map((elem) => Math.round(elem)),
+        });
+        setProofData(generatedProofData);
+        const generatedZkOutput = generatedProofData.publicSignals.map((elem) =>
+          Number(elem)
+        );
+        setZkOutput(generatedZkOutput);
+
+        console.log(generatedProofData.proof);
+        break;
+      }
+      case Framework.Noir: {
+        let noir: Noir | undefined;
         ({ noir, proofData: generatedProofData } = await generateProofNoir(
           model.id,
           input.map((elem) => Math.round(elem * model.scalingFactor))
         ));
         setNoirInstance(noir);
         setProofData(generatedProofData);
+        const generatedZkOutput = generatedProofData.publicInputs;
+        setZkOutput(mapHexToInt(generatedZkOutput));
+
+        const hexProof = mapProofToHex(generatedProofData.proof);
+        setProofHex(hexProof);
         break;
+      }
       default:
         throw new Error('Unsupported framework');
     }
 
     if (generatedProofData) {
-      const generatedZkOutput = generatedProofData.publicInputs;
-      setZkOutput(mapHexToInt(generatedZkOutput));
-
-      const hexProof = mapProofToHex(generatedProofData.proof);
-      setProofHex(hexProof);
       setGenerateProofStatus('success');
     }
   };
@@ -77,7 +95,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   const handleVerifyProofOffChain = async () => {
     switch (selectedFramework) {
       case Framework.Noir:
-        await offChainVerification(noirInstance, proofData);
+        await offChainVerification(noirInstance, proofData as NoirProofData);
         setVerifyOffChainStatus('success');
         break;
       default:

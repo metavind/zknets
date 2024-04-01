@@ -12,7 +12,7 @@ export class CirclesModel implements InferenceModel {
 
   thumbnail = '/thumbnails/circles.png';
 
-  supportedFrameworks = [Framework.Noir];
+  supportedFrameworks = [Framework.Circom, Framework.Noir];
 
   inputShape = [2];
 
