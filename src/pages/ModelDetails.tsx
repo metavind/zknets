@@ -12,7 +12,7 @@ import verifyProofCircom from '@/frameworks/circom/proofVerifier';
 import {
   mapNoirProofToHex,
   mapCircomProofToHex,
-  mapHexToInt,
+  mapFromPrimeField,
 } from '@/utils/proof';
 
 interface ModelDetailsProps {
@@ -29,7 +29,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   const [proofData, setProofData] = useState<
     CircomProofData | NoirProofData | undefined
   >(undefined);
-  const [zkOutput, setZkOutput] = useState<number[] | null>(null);
+  const [zkOutput, setZkOutput] = useState<string[] | null>(null);
   const [proofHex, setProofHex] = useState<string | null>(null);
   const [noirInstance, setNoirInstance] = useState<Noir | undefined>(undefined);
   const [generateProofStatus, setGenerateProofStatus] = useState<
@@ -61,14 +61,17 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 
     switch (selectedFramework) {
       case Framework.Circom: {
-        generatedProofData = await generateProofCircom(model.id, {
-          a: input.map((elem) => Math.round(elem)),
-        });
+        generatedProofData = await generateProofCircom(
+          model.id,
+          input.map((val) => Math.round(val))
+        );
         setProofData(generatedProofData);
-        const generatedZkOutput = generatedProofData.publicSignals
-          .slice(0, -input.length)
-          .map((elem) => Number(elem));
-        setZkOutput(generatedZkOutput);
+        const generatedZkOutput = generatedProofData.publicSignals.slice(
+          0,
+          -input.length
+        );
+        const generatedOutputInt = mapFromPrimeField(generatedZkOutput);
+        setZkOutput(generatedOutputInt);
 
         const hexProof = mapCircomProofToHex(generatedProofData.proof);
         setProofHex(hexProof);
@@ -79,12 +82,13 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
         let noir: Noir | undefined;
         ({ noir, proofData: generatedProofData } = await generateProofNoir(
           model.id,
-          input.map((elem) => Math.round(elem * model.scalingFactor))
+          input.map((val) => Math.round(val * model.scalingFactor))
         ));
         setNoirInstance(noir);
         setProofData(generatedProofData);
         const generatedZkOutput = generatedProofData.publicInputs;
-        setZkOutput(mapHexToInt(generatedZkOutput));
+        const generatedOutputInt = mapFromPrimeField(generatedZkOutput);
+        setZkOutput(generatedOutputInt);
 
         const hexProof = mapNoirProofToHex(generatedProofData.proof);
         setProofHex(hexProof);

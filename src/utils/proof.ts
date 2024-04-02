@@ -1,4 +1,3 @@
-import { BN } from 'bn.js';
 import { PlonkProof as CircomPlonkProof } from 'snarkjs';
 
 const prime = BigInt(
@@ -18,11 +17,18 @@ export const mapToPrimeField = (input: number[]): bigint[] =>
     return res;
   });
 
+export const mapFromPrimeField = (input: string[]): string[] =>
+  input.map((val) => {
+    let res = BigInt(val);
+    if (res > prime / BigInt(2)) {
+      res = prime - res;
+      return `-${res.toString()}`;
+    }
+    return res.toString();
+  });
+
 export const mapIntToHex = (input: bigint[]): string[] =>
   input.map((val) => `0x${val.toString(16)}`);
-
-export const mapHexToInt = (input: string[]): number[] =>
-  input.map((val) => parseInt(val, 10));
 
 export const mapNoirProofToHex = (proof: Uint8Array): string =>
   Array.from(proof)
@@ -60,8 +66,8 @@ export const mapCircomProofToHex = (proof: CircomPlonkProof): string => {
     proof.eval_zw,
   ];
 
-  const hexProofArray = proofArray.map((elem) => {
-    const hexElem = new BN(elem, 10);
+  const hexProofArray = proofArray.map((val) => {
+    const hexElem = BigInt(val);
     return hexElem.toString(16).padStart(64, '0');
   });
 
