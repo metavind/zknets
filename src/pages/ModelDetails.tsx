@@ -5,9 +5,10 @@ import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
 import Circles from '@/components/Inputs/Circles';
 import generateProofNoir from '@/frameworks/noir/proofGenerator';
-import { generateCircomProof } from '@/frameworks/circom/proofGenerator';
+import generateProofCircom from '@/frameworks/circom/proofGenerator';
 import { CircomProofData } from '@/frameworks/circom';
-import offChainVerification from '@/frameworks/noir/offChainVerifier';
+import verifyProofNoir from '@/frameworks/noir/proofVerifier';
+import verifyProofCircom from '@/frameworks/circom/proofVerifier';
 import {
   mapNoirProofToHex,
   mapCircomProofToHex,
@@ -34,10 +35,10 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   const [generateProofStatus, setGenerateProofStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
-  const [verifyOffChainStatus, setVerifyOffChainStatus] = useState<
+  const [verifyOffChainStatus, setVerifyProofStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
-  const [verifyOnChainStatus, setVerifyOnChainStatus] = useState<
+  const [verifyOnChainStatus, setVerifyProofOnChainStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
 
@@ -47,8 +48,8 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     setProofData(undefined);
     setProofHex(null);
     setGenerateProofStatus('idle');
-    setVerifyOffChainStatus('idle');
-    setVerifyOnChainStatus('idle');
+    setVerifyProofStatus('idle');
+    setVerifyProofOnChainStatus('idle');
     setInput(newInput);
   };
 
@@ -56,11 +57,11 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     const result = await model.runInference(input);
     setInferenceOutput(result);
 
-    let generatedProofData: NoirProofData | CircomProofData | undefined;
+    let generatedProofData: CircomProofData | NoirProofData | undefined;
 
     switch (selectedFramework) {
       case Framework.Circom: {
-        generatedProofData = await generateCircomProof({
+        generatedProofData = await generateProofCircom(model.id, {
           a: input.map((elem) => Math.round(elem)),
         });
         setProofData(generatedProofData);
@@ -98,12 +99,28 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     }
   };
 
-  const handleVerifyProofOffChain = async () => {
+  const handleVerifyProof = async () => {
     switch (selectedFramework) {
-      case Framework.Noir:
-        await offChainVerification(noirInstance, proofData as NoirProofData);
-        setVerifyOffChainStatus('success');
+      case Framework.Circom: {
+        const verifyStatus = await verifyProofCircom(
+          model.id,
+          proofData as CircomProofData
+        );
+        if (verifyStatus) {
+          setVerifyProofStatus('success');
+        }
         break;
+      }
+      case Framework.Noir: {
+        const verifyStatus = await verifyProofNoir(
+          noirInstance,
+          proofData as NoirProofData
+        );
+        if (verifyStatus) {
+          setVerifyProofStatus('success');
+        }
+        break;
+      }
       default:
         throw new Error('Unsupported framework');
     }
@@ -114,7 +131,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     /* {
 
     } */
-    setVerifyOnChainStatus('success');
+    setVerifyProofOnChainStatus('success');
     await Promise.resolve(-1);
   };
 
@@ -136,8 +153,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
           onClick={handleGenerateProof}
           disabled={input.length === 0 || generateProofStatus === 'success'}
         >
-          Run Inference
-          <br />& Generate Proof
+          Generate Proof
         </button>
 
         <button
@@ -147,15 +163,13 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
               : 'border-gray-800 bg-gray-100  hover:bg-gray-900 hover:text-white dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800'
           }`}
           type="button"
-          onClick={handleVerifyProofOffChain}
+          onClick={handleVerifyProof}
           disabled={
             generateProofStatus !== 'success' ||
             verifyOffChainStatus === 'success'
           }
         >
-          Verify
-          <br />
-          (off-chain)
+          Verify Proof
         </button>
         <button
           className={`mb-2 me-2 w-60 rounded-lg border px-10 py-5 text-center text-lg font-semibold text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -170,7 +184,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
             verifyOnChainStatus === 'success'
           }
         >
-          Verify
+          Verify Proof
           <br />
           (on-chain)
         </button>
@@ -182,15 +196,15 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
               <div className="mb-6 mt-2 flex justify-center space-x-32">
                 <div>
                   <h4 className="mb-2 text-xl font-semibold">
-                    Expected Output
+                    Inference Output
                   </h4>
-                  <p className="text-center">
+                  <p className="text-center text-lg">
                     {inferenceOutput ? inferenceOutput.join(', ') : '-'}
                   </p>
                 </div>
                 <div>
-                  <h4 className="mb-2 text-xl font-semibold">Model Output</h4>
-                  <p className="text-center">
+                  <h4 className="mb-2 text-xl font-semibold">Circuit Output</h4>
+                  <p className="text-center text-lg">
                     {zkOutput ? zkOutput.join(', ') : '-'}
                   </p>
                 </div>

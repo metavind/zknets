@@ -10,12 +10,12 @@ interface GenerateProofNoirResult {
 }
 
 const generateProofNoir = async (
-  model: string,
+  modelName: string,
   input: number[]
 ): Promise<GenerateProofNoirResult> => {
   const inputs = { input: mapIntToHex(mapToPrimeField(input)) };
 
-  const circuitPath = `/circuits/noir/${model}.json`;
+  const circuitPath = `/circuits/noir/${modelName}.json`;
   const response = await fetch(circuitPath);
   const circuit = (await response.json()) as CompiledCircuit;
 

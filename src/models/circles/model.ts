@@ -10,7 +10,7 @@ export class CirclesModel implements InferenceModel {
 
   description = 'Binary classification of concentric circles';
 
-  thumbnail = '/thumbnails/circles.png';
+  thumbnail = `/thumbnails/${this.id}.png`;
 
   supportedFrameworks = [Framework.Circom, Framework.Noir];
 
@@ -21,7 +21,9 @@ export class CirclesModel implements InferenceModel {
   scalingFactor = 1e6;
 
   async runInference(input: number[]): Promise<number[]> {
-    const session = await InferenceSession.create('models/circles/model.onnx');
+    const modelPath = `models/${this.id}/model.onnx`;
+
+    const session = await InferenceSession.create(modelPath);
 
     const inputScaled = input.map((elem) =>
       Math.round(elem * this.scalingFactor)
