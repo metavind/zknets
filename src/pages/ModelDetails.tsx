@@ -8,7 +8,11 @@ import generateProofNoir from '@/frameworks/noir/proofGenerator';
 import { generateCircomProof } from '@/frameworks/circom/proofGenerator';
 import { CircomProofData } from '@/frameworks/circom';
 import offChainVerification from '@/frameworks/noir/offChainVerifier';
-import { mapProofToHex, mapHexToInt } from '@/utils/proof';
+import {
+  mapNoirProofToHex,
+  mapCircomProofToHex,
+  mapHexToInt,
+} from '@/utils/proof';
 
 interface ModelDetailsProps {
   model: InferenceModel;
@@ -60,12 +64,14 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
           a: input.map((elem) => Math.round(elem)),
         });
         setProofData(generatedProofData);
-        const generatedZkOutput = generatedProofData.publicSignals.map((elem) =>
-          Number(elem)
-        );
+        const generatedZkOutput = generatedProofData.publicSignals
+          .slice(0, -input.length)
+          .map((elem) => Number(elem));
         setZkOutput(generatedZkOutput);
 
-        console.log(generatedProofData.proof);
+        const hexProof = mapCircomProofToHex(generatedProofData.proof);
+        setProofHex(hexProof);
+
         break;
       }
       case Framework.Noir: {
@@ -79,7 +85,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
         const generatedZkOutput = generatedProofData.publicInputs;
         setZkOutput(mapHexToInt(generatedZkOutput));
 
-        const hexProof = mapProofToHex(generatedProofData.proof);
+        const hexProof = mapNoirProofToHex(generatedProofData.proof);
         setProofHex(hexProof);
         break;
       }
