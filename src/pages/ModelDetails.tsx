@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ProofData as NoirProofData } from '@noir-lang/types';
 import { Noir } from '@noir-lang/noir_js';
 import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
@@ -9,7 +8,7 @@ import {
   CircomProofData,
   generateProofBundleCircom,
 } from '@/frameworks/circom';
-import { generateProofBundleNoir } from '@/frameworks/noir';
+import { NoirProofData, generateProofBundleNoir } from '@/frameworks/noir';
 import verifyProofNoir from '@/frameworks/noir/proofVerifier';
 import verifyProofCircom from '@/frameworks/circom/proofVerifier';
 

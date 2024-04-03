@@ -1,4 +1,4 @@
-import { PlonkProof, PublicSignals } from 'snarkjs';
+import { CircuitSignals, PlonkProof, PublicSignals } from 'snarkjs';
 import { InferenceModel } from '@/models';
 import generateProofCircom from '@/frameworks/circom/proofGenerator';
 import { prepareInputForCircuit } from '@/utils/math';
@@ -17,7 +17,9 @@ export const generateProofBundleCircom = async (
   zkOutput: string[];
   proofHex: string;
 }> => {
-  const circuitInput = prepareInputForCircuit(input, model.inputScalingFactor);
+  const circuitInput: CircuitSignals = {
+    a: prepareInputForCircuit(input, model.inputScalingFactor),
+  };
   const { proof, publicSignals } = await generateProofCircom(
     model.id,
     circuitInput
