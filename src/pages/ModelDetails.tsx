@@ -4,16 +4,14 @@ import { Noir } from '@noir-lang/noir_js';
 import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
 import Circles from '@/components/Inputs/Circles';
-import generateProofNoir from '@/frameworks/noir/proofGenerator';
-import generateProofCircom from '@/frameworks/circom/proofGenerator';
-import { CircomProofData } from '@/frameworks/circom';
+import runInference from '@/models/inference';
+import {
+  CircomProofData,
+  generateProofBundleCircom,
+} from '@/frameworks/circom';
+import { generateProofBundleNoir } from '@/frameworks/noir';
 import verifyProofNoir from '@/frameworks/noir/proofVerifier';
 import verifyProofCircom from '@/frameworks/circom/proofVerifier';
-import {
-  mapNoirProofToHex,
-  mapCircomProofToHex,
-  mapFromPrimeField,
-} from '@/utils/proof';
 
 interface ModelDetailsProps {
   model: InferenceModel;
@@ -35,10 +33,10 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   const [generateProofStatus, setGenerateProofStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
-  const [verifyOffChainStatus, setVerifyProofStatus] = useState<
+  const [verifyProofStatus, setVerifyProofStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
-  const [verifyOnChainStatus, setVerifyProofOnChainStatus] = useState<
+  const [verifyProofOnChainStatus, setVerifyProofOnChainStatus] = useState<
     'idle' | 'success' | 'failure'
   >('idle');
 
@@ -47,6 +45,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     setZkOutput(null);
     setProofData(undefined);
     setProofHex(null);
+    setNoirInstance(undefined);
     setGenerateProofStatus('idle');
     setVerifyProofStatus('idle');
     setVerifyProofOnChainStatus('idle');
@@ -54,44 +53,40 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   };
 
   const handleGenerateProof = async () => {
-    const result = await model.runInference(input);
+    const result = await runInference(model, input);
     setInferenceOutput(result);
 
     let generatedProofData: CircomProofData | NoirProofData | undefined;
+    let generatedZkOutput: string[];
+    let generatedProofHex: string;
 
     switch (selectedFramework) {
       case Framework.Circom: {
-        generatedProofData = await generateProofCircom(
-          model.id,
-          input.map((val) => Math.round(val))
-        );
-        setProofData(generatedProofData);
-        const generatedZkOutput = generatedProofData.publicSignals.slice(
-          0,
-          -input.length
-        );
-        const generatedOutputInt = mapFromPrimeField(generatedZkOutput);
-        setZkOutput(generatedOutputInt);
+        const {
+          proofData: circomProofData,
+          zkOutput: circomZkOutput,
+          proofHex: circomProofHex,
+        } = await generateProofBundleCircom(model, input);
 
-        const hexProof = mapCircomProofToHex(generatedProofData.proof);
-        setProofHex(hexProof);
-
+        generatedProofData = circomProofData;
+        generatedZkOutput = circomZkOutput;
+        generatedProofHex = circomProofHex;
         break;
       }
       case Framework.Noir: {
-        let noir: Noir | undefined;
-        ({ noir, proofData: generatedProofData } = await generateProofNoir(
-          model.id,
-          input.map((val) => Math.round(val * model.scalingFactor))
-        ));
-        setNoirInstance(noir);
-        setProofData(generatedProofData);
-        const generatedZkOutput = generatedProofData.publicInputs;
-        const generatedOutputInt = mapFromPrimeField(generatedZkOutput);
-        setZkOutput(generatedOutputInt);
+        const {
+          proofData: noirProofData,
+          zkOutput: noirZkOutput,
+          proofHex: noirProofHex,
+          noirInstance: noir,
+        } = await generateProofBundleNoir(model, input);
 
-        const hexProof = mapNoirProofToHex(generatedProofData.proof);
-        setProofHex(hexProof);
+        const generatedNoirInstance = noir;
+        setNoirInstance(generatedNoirInstance);
+
+        generatedProofData = noirProofData;
+        generatedZkOutput = noirZkOutput;
+        generatedProofHex = noirProofHex;
         break;
       }
       default:
@@ -99,34 +94,40 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
     }
 
     if (generatedProofData) {
+      setProofData(generatedProofData);
+      setZkOutput(generatedZkOutput);
+      setProofHex(generatedProofHex);
       setGenerateProofStatus('success');
     }
   };
 
   const handleVerifyProof = async () => {
+    let verifyStatus: boolean = false;
     switch (selectedFramework) {
       case Framework.Circom: {
-        const verifyStatus = await verifyProofCircom(
+        verifyStatus = await verifyProofCircom(
           model.id,
           proofData as CircomProofData
         );
-        if (verifyStatus) {
-          setVerifyProofStatus('success');
-        }
         break;
       }
       case Framework.Noir: {
-        const verifyStatus = await verifyProofNoir(
+        if (!noirInstance) {
+          throw new Error('Noir instance is required for Noir framework');
+        }
+        verifyStatus = await verifyProofNoir(
           noirInstance,
           proofData as NoirProofData
         );
-        if (verifyStatus) {
-          setVerifyProofStatus('success');
-        }
         break;
       }
       default:
         throw new Error('Unsupported framework');
+    }
+    if (verifyStatus) {
+      setVerifyProofStatus('success');
+    } else {
+      setVerifyProofStatus('failure');
     }
   };
 
@@ -162,22 +163,21 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
 
         <button
           className={`mb-2 me-2 w-60 rounded-lg border px-10 py-5 text-center text-lg font-semibold text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50 ${
-            verifyOffChainStatus === 'success'
+            verifyProofStatus === 'success'
               ? 'border-green-600 bg-green-300'
               : 'border-gray-800 bg-gray-100  hover:bg-gray-900 hover:text-white dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800'
           }`}
           type="button"
           onClick={handleVerifyProof}
           disabled={
-            generateProofStatus !== 'success' ||
-            verifyOffChainStatus === 'success'
+            generateProofStatus !== 'success' || verifyProofStatus === 'success'
           }
         >
           Verify Proof
         </button>
         <button
           className={`mb-2 me-2 w-60 rounded-lg border px-10 py-5 text-center text-lg font-semibold text-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50 ${
-            verifyOnChainStatus === 'success'
+            verifyProofOnChainStatus === 'success'
               ? 'border-green-600 bg-green-300'
               : 'border-gray-800 bg-gray-100  hover:bg-gray-900 hover:text-white dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800'
           }`}
@@ -185,7 +185,7 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
           onClick={handleVerifyProofOnChain}
           disabled={
             generateProofStatus !== 'success' ||
-            verifyOnChainStatus === 'success'
+            verifyProofOnChainStatus === 'success'
           }
         >
           Verify Proof
