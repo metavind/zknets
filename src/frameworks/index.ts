@@ -1,5 +1,5 @@
 export enum Framework {
-  Noir = 'Noir',
   Circom = 'Circom',
+  Noir = 'Noir',
   // Add more frameworks here
 }
