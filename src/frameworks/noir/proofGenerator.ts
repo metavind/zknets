@@ -2,7 +2,6 @@ import { toast } from 'react-toastify';
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg';
 import { Noir } from '@noir-lang/noir_js';
 import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { mapToPrimeField, mapIntToHex } from '@/utils/proof';
 
 interface GenerateProofNoirResult {
   noir: Noir;
@@ -11,9 +10,9 @@ interface GenerateProofNoirResult {
 
 const generateProofNoir = async (
   modelName: string,
-  input: number[]
+  input: string[]
 ): Promise<GenerateProofNoirResult> => {
-  const inputs = { input: mapIntToHex(mapToPrimeField(input)) };
+  const inputs = { input };
 
   const circuitPath = `/circuits/noir/${modelName}.json`;
   const response = await fetch(circuitPath);
