@@ -9,7 +9,7 @@ export interface InferenceModel {
   thumbnail: string;
   supportedFrameworks: Framework[];
   inputShape: number[];
+  inputScalingFactor: number;
   outputShape: number[];
-  scalingFactor: number;
-  runInference(input: number[]): Promise<number[]>;
+  isClassifier: boolean;
 }

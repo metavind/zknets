@@ -1,8 +1,7 @@
 import { toast } from 'react-toastify';
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg';
 import { Noir } from '@noir-lang/noir_js';
-import { CompiledCircuit, ProofData } from '@noir-lang/types';
-import { mapToPrimeField, mapIntToHex } from '@/utils/proof';
+import { InputMap, CompiledCircuit, ProofData } from '@noir-lang/types';
 
 interface GenerateProofNoirResult {
   noir: Noir;
@@ -10,12 +9,10 @@ interface GenerateProofNoirResult {
 }
 
 const generateProofNoir = async (
-  model: string,
-  input: number[]
+  modelName: string,
+  circuitInput: InputMap
 ): Promise<GenerateProofNoirResult> => {
-  const inputs = { input: mapIntToHex(mapToPrimeField(input)) };
-
-  const circuitPath = `/circuits/noir/${model}.json`;
+  const circuitPath = `/circuits/noir/${modelName}.json`;
   const response = await fetch(circuitPath);
   const circuit = (await response.json()) as CompiledCircuit;
 
@@ -30,7 +27,7 @@ const generateProofNoir = async (
     error: 'Error initializing Noir',
   });
 
-  const proofData = await toast.promise(noir.generateProof(inputs), {
+  const proofData = await toast.promise(noir.generateProof(circuitInput), {
     pending: 'Generating proof',
     success: 'Proof generated',
     error: 'Error generating proof',

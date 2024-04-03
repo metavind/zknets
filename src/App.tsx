@@ -12,7 +12,7 @@ const models = [new CirclesModel()];
 
 const App: React.FC = () => {
   const [selectedFramework, setSelectedFramework] = useState<Framework>(
-    Framework.Noir
+    Framework.Circom
   );
   const [selectedModel, setSelectedModel] = useState<InferenceModel | null>(
     null
