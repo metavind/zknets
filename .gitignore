@@ -44,3 +44,6 @@ dist-ssr
 
 # wasm files
 *.wasm
+
+# Model training files
+model_training
