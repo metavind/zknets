@@ -14,7 +14,7 @@ export class CirclesModel implements InferenceModel {
 
   inputShape = [2];
 
-  inputScalingFactor = 1e6;
+  inputScalingFactor = 1e1;
 
   outputShape = [1];
 
