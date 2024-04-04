@@ -42,8 +42,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# wasm files
-*.wasm
+# wasm files in public folder
+public/*.wasm
 
 # Model training files
 model_training
