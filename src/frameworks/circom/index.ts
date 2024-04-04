@@ -18,13 +18,13 @@ export const generateProofBundleCircom = async (
   proofHex: string;
 }> => {
   const circuitInput: CircuitSignals = {
-    a: prepareInputForCircuit(input, model.inputScalingFactor),
+    in: prepareInputForCircuit(input, model.inputScalingFactor),
   };
   const { proof, publicSignals } = await generateProofCircom(
     model.id,
     circuitInput
   );
-  const zkOutput = mapFromPrimeField(publicSignals.slice(0, -input.length));
+  const zkOutput = mapFromPrimeField(publicSignals);
   const proofHex = mapCircomProofToHex(proof);
   return { proofData: { proof, publicSignals }, zkOutput, proofHex };
 };
