@@ -30,41 +30,38 @@ export const mapFromPrimeField = (input: string[]): string[] =>
 export const mapIntToHex = (input: bigint[]): string[] =>
   input.map((val) => `0x${val.toString(16)}`);
 
-export const mapNoirProofToHex = (proof: Uint8Array): string =>
-  Array.from(proof)
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join(' ');
-
 export const splitHexInPairs = (hex: string): string =>
   hex.match(/.{2}/g)?.join(' ') || '';
 
+export const getCircomProof = (proof: CircomPlonkProof): string[] => [
+  proof.A[0],
+  proof.A[1],
+  proof.B[0],
+  proof.B[1],
+  proof.C[0],
+  proof.C[1],
+  proof.Z[0],
+  proof.Z[1],
+  proof.T1[0],
+  proof.T1[1],
+  proof.T2[0],
+  proof.T2[1],
+  proof.T3[0],
+  proof.T3[1],
+  proof.Wxi[0],
+  proof.Wxi[1],
+  proof.Wxiw[0],
+  proof.Wxiw[1],
+  proof.eval_a,
+  proof.eval_b,
+  proof.eval_c,
+  proof.eval_s1,
+  proof.eval_s2,
+  proof.eval_zw,
+];
+
 export const mapCircomProofToHex = (proof: CircomPlonkProof): string => {
-  const proofArray = [
-    proof.A[0],
-    proof.A[1],
-    proof.B[0],
-    proof.B[1],
-    proof.C[0],
-    proof.C[1],
-    proof.Z[0],
-    proof.Z[1],
-    proof.T1[0],
-    proof.T1[1],
-    proof.T2[0],
-    proof.T2[1],
-    proof.T3[0],
-    proof.T3[1],
-    proof.Wxi[0],
-    proof.Wxi[1],
-    proof.Wxiw[0],
-    proof.Wxiw[1],
-    proof.eval_a,
-    proof.eval_b,
-    proof.eval_c,
-    proof.eval_s1,
-    proof.eval_s2,
-    proof.eval_zw,
-  ];
+  const proofArray = getCircomProof(proof);
 
   const hexProofArray = proofArray.map((val) => {
     const hexElem = BigInt(val);
@@ -75,3 +72,8 @@ export const mapCircomProofToHex = (proof: CircomPlonkProof): string => {
 
   return splitHexInPairs(hexProof);
 };
+
+export const mapNoirProofToHex = (proof: Uint8Array): string =>
+  Array.from(proof)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join(' ');
