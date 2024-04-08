@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Noir } from '@noir-lang/noir_js';
+import { Contract } from 'ethers';
 import { InferenceModel } from '@/models';
 import { Framework } from '@/frameworks';
 import Circles from '@/components/Inputs/Circles';
@@ -11,6 +12,9 @@ import {
 import { NoirProofData, generateProofBundleNoir } from '@/frameworks/noir';
 import verifyProofNoir from '@/frameworks/noir/proofVerifier';
 import verifyProofCircom from '@/frameworks/circom/proofVerifier';
+import { initializeEthers } from '@/utils/ethers';
+import verifyProofOnChainCircom from '@/frameworks/circom/offChainProofVerifier';
+import verifyProofOnChainNoir from '@/frameworks/noir/offChainProofVerifier';
 
 interface ModelDetailsProps {
   model: InferenceModel;
@@ -131,12 +135,40 @@ const ModelDetails: React.FC<ModelDetailsProps> = ({
   };
 
   const handleVerifyProofOnChain = async () => {
-    // TODO: Implement on-chain verification
-    /* {
+    let verifyOnChainStatus: boolean = false;
 
-    } */
-    setVerifyProofOnChainStatus('success');
-    await Promise.resolve(-1);
+    const contract: Contract | null = await initializeEthers(
+      selectedFramework,
+      model.id
+    );
+
+    if (!contract) {
+      throw new Error('Contract not initialized');
+    }
+
+    switch (selectedFramework) {
+      case Framework.Circom: {
+        verifyOnChainStatus = await verifyProofOnChainCircom(
+          contract,
+          proofData as CircomProofData
+        );
+        break;
+      }
+      case Framework.Noir: {
+        verifyOnChainStatus = await verifyProofOnChainNoir(
+          contract,
+          proofData as NoirProofData
+        );
+        break;
+      }
+      default:
+        throw new Error('Unsupported framework');
+    }
+    if (verifyOnChainStatus) {
+      setVerifyProofOnChainStatus('success');
+    } else {
+      setVerifyProofOnChainStatus('failure');
+    }
   };
 
   return (
