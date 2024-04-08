@@ -94,28 +94,5 @@
       "type": "function"
     }
   ],
-  "devdoc": {
-    "kind": "dev",
-    "methods": {
-      "verify(bytes,bytes32[])": {
-        "params": {
-          "_proof": "- The serialized proof",
-          "_publicInputs": "- An array of the public inputs"
-        },
-        "returns": {
-          "_0": "True if proof is valid, reverts otherwise"
-        }
-      }
-    },
-    "version": 1
-  },
-  "userdoc": {
-    "kind": "user",
-    "methods": {
-      "verify(bytes,bytes32[])": {
-        "notice": "Verify a Ultra Plonk proof"
-      }
-    },
-    "version": 1
-  }
+  "address": "0x396953ecdd81830f915950acfa880d4caa608f73"
 }

@@ -25,14 +25,5 @@
       "type": "function"
     }
   ],
-  "devdoc": {
-    "kind": "dev",
-    "methods": {},
-    "version": 1
-  },
-  "userdoc": {
-    "kind": "user",
-    "methods": {},
-    "version": 1
-  }
+  "address": "0x97949cd51c24086f0c8918f9e0e137383a955722"
 }

@@ -1,8 +1,8 @@
-import { ethers, Addressable, Contract } from 'ethers';
-import { Framework } from '@/frameworks';
+import { ethers, Contract } from 'ethers';
+import { Framework, Artifacts } from '@/frameworks';
 
-// const chainId = '0xaa36a7';
-const chainId = '0x7a69'; // 31337
+const chainId = '0xaa36a7';
+// const chainId = '0x7a69'; // 31337
 
 declare global {
   interface Window {
@@ -33,20 +33,14 @@ export const initializeEthers = async (
 
     const framework = selectedFramework.toLowerCase();
 
-    const addressesResponse = await fetch('/circuits/contract_addresses.json');
-    const addresses = await addressesResponse.json();
-    const contractAddress = addresses[framework][modelName] as Addressable;
-
     const artifactsResponse = await fetch(
       `/circuits/${framework}/${modelName}/artifacts.json`
     );
-    const contractArtifacts = await artifactsResponse.json();
+    const contractArtifacts = (await artifactsResponse.json()) as Artifacts;
 
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractArtifacts.abi,
-      signer
-    );
+    const { abi, address } = contractArtifacts;
+
+    const contract = new ethers.Contract(address, abi, signer);
 
     return contract;
   }
