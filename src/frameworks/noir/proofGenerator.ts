@@ -12,7 +12,7 @@ const generateProofNoir = async (
   modelName: string,
   circuitInput: InputMap
 ): Promise<GenerateProofNoirResult> => {
-  const circuitPath = `/circuits/noir/${modelName}.json`;
+  const circuitPath = `/circuits/noir/${modelName}/circuit.json`;
   const response = await fetch(circuitPath);
   const circuit = (await response.json()) as CompiledCircuit;
 
